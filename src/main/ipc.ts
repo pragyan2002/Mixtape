@@ -97,7 +97,7 @@ export function registerIpcHandlers(win: BrowserWindow): void {
       .object({
         jobs: z.array(DownloadJobSchema),
         outputDir: z.string().min(1),
-        bitrate: z.number().int().min(128).max(320),
+        bitrate: z.number().int().min(128).max(256),
         filenameTemplate: z.string(),
       })
       .parse(payload)

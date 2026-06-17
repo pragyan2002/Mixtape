@@ -54,7 +54,7 @@ export function SettingsPage({ settings, onSaved }: Props) {
               type="text"
               value={form.outputFolder}
               readOnly
-              placeholder="Not set — will prompt on each download"
+              placeholder="Not set, will prompt on each download"
               className="flex-1 bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-sm text-slate-200 placeholder-slate-500 focus:outline-none cursor-default"
             />
             <button
@@ -91,7 +91,7 @@ export function SettingsPage({ settings, onSaved }: Props) {
           <input
             type="range"
             min={128}
-            max={320}
+            max={256}
             step={32}
             value={form.bitrate}
             onChange={(e) => update('bitrate', parseInt(e.target.value))}
@@ -99,11 +99,11 @@ export function SettingsPage({ settings, onSaved }: Props) {
           />
           <div className="flex justify-between text-xs text-slate-500">
             <span>128 kbps</span>
-            <span>256 kbps (default)</span>
-            <span>320 kbps</span>
+            <span>192 kbps</span>
+            <span>256 kbps (default, max)</span>
           </div>
           <p className="text-xs text-slate-500">
-            YouTube Music source is ~128–256 kbps — going above 256 adds no quality.
+            YouTube Music source tops out at ~256 kbps, so that is the max here too.
           </p>
         </div>
       </section>

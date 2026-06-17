@@ -70,7 +70,7 @@ export function ImportPage({ onImported }: Props) {
       <div className="text-center">
         <h1 className="text-2xl font-bold text-white mb-2">Import Your Music Library</h1>
         <p className="text-slate-400 max-w-md">
-          Choose how to load your YouTube Music library. Takeout CSV is recommended — no login
+          Choose how to load your YouTube Music library. Takeout CSV is recommended, no login
           needed.
         </p>
       </div>
@@ -79,7 +79,7 @@ export function ImportPage({ onImported }: Props) {
         {/* Takeout CSV */}
         <div className="space-y-3">
           <h2 className="text-sm font-semibold text-slate-300 uppercase tracking-wider">
-            Option 1 — Google Takeout CSV
+            Option 1: Google Takeout CSV
           </h2>
           <div
             className={[
@@ -115,7 +115,7 @@ export function ImportPage({ onImported }: Props) {
         {/* Browser cookies */}
         <div className="space-y-3">
           <h2 className="text-sm font-semibold text-slate-300 uppercase tracking-wider">
-            Option 2 — Connect via Browser
+            Option 2: Connect via Browser
           </h2>
           <div className="border border-slate-700 rounded-xl p-6 space-y-4">
             <div className="flex items-center gap-2 text-slate-400">
@@ -147,7 +147,7 @@ export function ImportPage({ onImported }: Props) {
             </Button>
             <p className="text-slate-500 text-xs">
               Make sure you&apos;re logged into YouTube Music in your selected browser. The app reads
-              cookies locally — nothing is sent externally.
+              cookies locally, nothing is sent externally.
             </p>
           </div>
         </div>

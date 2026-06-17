@@ -53,7 +53,7 @@ function TrackRow({
         <div className="flex items-center gap-2">
           <span className="text-sm text-slate-200 font-medium">{track.title}</span>
           {track.isMusicVideo && (
-            <span title="Music video — audio may contain video audio track">
+            <span title="Music video, audio may contain video audio track">
               <AlertTriangle size={13} className="text-amber-400" />
             </span>
           )}

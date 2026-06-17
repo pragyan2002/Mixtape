@@ -40,7 +40,7 @@ export type DownloadJob = z.infer<typeof DownloadJobSchema>
 
 export const SettingsSchema = z.object({
   outputFolder: z.string().default(''),
-  bitrate: z.number().int().min(128).max(320).default(256),
+  bitrate: z.number().int().min(128).max(256).default(256),
   concurrency: z.number().int().min(1).max(10).default(3),
   filenameTemplate: z.enum(['artist-title', 'title-artist', 'title']).default('artist-title'),
   disclaimerAccepted: z.boolean().default(false),

@@ -24,7 +24,7 @@ export function DisclaimerModal({ onAccepted }: Props) {
       <div className="bg-slate-800 border border-slate-700 rounded-xl shadow-2xl max-w-lg w-full mx-4 p-6 space-y-5">
         <div className="flex items-center gap-3">
           <span className="text-2xl">🎵</span>
-          <h1 className="text-xl font-bold text-white">Mixtape — Personal Use Notice</h1>
+          <h1 className="text-xl font-bold text-white">Mixtape: Personal Use Notice</h1>
         </div>
 
         <div className="text-slate-300 text-sm space-y-3 max-h-64 overflow-y-auto pr-1">
@@ -60,7 +60,7 @@ export function DisclaimerModal({ onAccepted }: Props) {
 
         <div className="flex gap-3 pt-1">
           <Button variant="primary" loading={loading} onClick={handleAccept} className="flex-1">
-            I Accept — Continue
+            I Accept, Continue
           </Button>
           <Button variant="ghost" onClick={handleReject} className="flex-1">
             Reject &amp; Quit
