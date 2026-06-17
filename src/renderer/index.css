@@ -1,14 +1,24 @@
 @import "tailwindcss";
 
 @theme {
-  --color-primary: #7c3aed;
-  --color-primary-hover: #6d28d9;
-  --color-surface: #1a1a2e;
-  --color-surface-2: #16213e;
-  --color-surface-3: #0f3460;
-  --color-accent: #e94560;
-  --color-text: #e2e8f0;
-  --color-text-muted: #94a3b8;
+  /* sky / hills inspired by Windows XP "Bliss" */
+  --color-sky-top: #4aa3ef;
+  --color-sky-mid: #8fcbff;
+  --color-sky-low: #cfe8ff;
+  --color-hill-near: #4f8a3a;
+  --color-hill-far: #6fb04e;
+  --color-cloud: #ffffff;
+
+  /* content surfaces: translucent glass over Bliss */
+  --color-surface: rgba(255, 255, 255, 0.72);
+  --color-surface-2: rgba(255, 255, 255, 0.55);
+  --color-text: #0f172a;
+  --color-text-muted: #475569;
+
+  --color-primary: #1d4ed8;
+  --color-primary-hover: #1e3a8a;
+  --color-accent: #db2777;
+
   --font-mono: "JetBrains Mono", "Fira Code", "Cascadia Code", monospace;
 }
 
@@ -25,7 +35,7 @@ body,
 }
 
 body {
-  background-color: var(--color-surface);
+  background: transparent;
   color: var(--color-text);
   font-family: system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -40,11 +50,11 @@ body {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #334155;
+  background: rgba(15, 23, 42, 0.25);
   border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #475569;
+  background: rgba(15, 23, 42, 0.4);
 }
 
 /* Drag-and-drop region */
@@ -53,4 +63,13 @@ body {
 }
 .no-drag {
   -webkit-app-region: no-drag;
+}
+
+/* Glass card: content surfaces floating over the Bliss background */
+.glass {
+  background: var(--color-surface);
+  backdrop-filter: blur(10px) saturate(1.1);
+  -webkit-backdrop-filter: blur(10px) saturate(1.1);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
 }
