@@ -16,6 +16,12 @@ export default defineConfig({
     plugins: [externalizeDepsPlugin()],
   },
   renderer: {
+    root: '.',
+    build: {
+      rollupOptions: {
+        input: resolve('index.html'),
+      },
+    },
     plugins: [react(), tailwindcss()],
     resolve: {
       alias: {

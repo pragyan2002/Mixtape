@@ -47,7 +47,7 @@ export function ImportPage({ onImported }: Props) {
     setDragging(false)
     const files = Array.from(e.dataTransfer.files)
       .filter((f) => f.name.endsWith('.csv'))
-      .map((f) => f.path)
+      .map((f) => ipc.dialog.getPathForFile(f))
     handleFiles(files)
   }
 

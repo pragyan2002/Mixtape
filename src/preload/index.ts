@@ -1,4 +1,4 @@
-import { contextBridge, ipcRenderer } from 'electron'
+import { contextBridge, ipcRenderer, webUtils } from 'electron'
 import type { Settings, ImportResult, DownloadJob, ProgressEvent, Browser } from '../../shared/types'
 
 export type MixtapeAPI = typeof api
@@ -18,6 +18,7 @@ const api = {
   dialog: {
     openFiles: (): Promise<string[]> => ipcRenderer.invoke('dialog:openFiles'),
     openFolder: (): Promise<string | null> => ipcRenderer.invoke('dialog:openFolder'),
+    getPathForFile: (file: File): string => webUtils.getPathForFile(file),
   },
 
   import: {
