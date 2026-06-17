@@ -1,0 +1,50 @@
+appId: com.pragyan.mixtape
+productName: Mixtape
+copyright: "Copyright © 2026 Pragyan Shukla"
+
+directories:
+  buildResources: build
+  output: dist
+
+files:
+  - out/**/*
+  - "!**/*.map"
+
+extraResources:
+  - from: resources/bin/
+    to: bin/
+    filter:
+      - "yt-dlp*"
+      - "ffmpeg*"
+      - "ffprobe*"
+
+win:
+  target:
+    - target: nsis
+      arch: [x64]
+  icon: build/icon.ico
+
+mac:
+  target:
+    - target: dmg
+      arch: [x64, arm64]
+  icon: build/icon.icns
+  category: public.app-category.music
+
+linux:
+  target:
+    - target: AppImage
+      arch: [x64]
+  icon: build/icon.png
+  category: Audio
+
+nsis:
+  oneClick: true
+  perMachine: false
+  allowToChangeInstallationDirectory: false
+  deleteAppDataOnUninstall: false
+
+dmg:
+  sign: false
+
+publish: null

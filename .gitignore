@@ -1,0 +1,27 @@
+node_modules/
+dist/
+out/
+resources/bin/
+.env*
+*.local
+
+# Build artifacts
+build/icon.*
+*.dmg
+*.exe
+*.AppImage
+*.deb
+*.rpm
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/settings.json
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
