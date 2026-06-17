@@ -1,0 +1,35 @@
+# Third-Party Licenses
+
+## yt-dlp
+
+License: The Unlicense (public domain)
+Repository: https://github.com/yt-dlp/yt-dlp
+
+## FFmpeg
+
+License: GNU Lesser General Public License v2.1 (LGPL-2.1)
+Repository: https://www.ffmpeg.org / https://github.com/BtbN/FFmpeg-Builds
+
+Mixtape uses a shared (LGPL) build of FFmpeg. The FFmpeg source code is available at
+https://www.ffmpeg.org. You may obtain the source code for the version bundled with
+this application by visiting https://github.com/BtbN/FFmpeg-Builds.
+
+## Electron
+
+License: MIT
+Repository: https://github.com/electron/electron
+
+## React
+
+License: MIT
+Repository: https://github.com/facebook/react
+
+## Tailwind CSS
+
+License: MIT
+Repository: https://github.com/tailwindlabs/tailwindcss
+
+## Other npm dependencies
+
+All other dependencies are MIT or similarly permissive licensed.
+See node_modules/ or https://www.npmjs.com for individual package licenses.

@@ -1,0 +1,56 @@
+# Mixtape — repo map (read this first)
+
+Electron + TypeScript desktop app. YouTube Music library → MP3 files for iPod.
+Single verify command: `npm run check` (typecheck + lint + vitest).
+
+## Root
+CLAUDE.md           agent entry point: arch map, commands, IPC table, conventions
+AGENTS.md           tool-agnostic mirror of CLAUDE.md
+llms.txt            this file — one-line repo map
+README.md           minimal: what/run/build
+package.json        deps + scripts
+electron.vite.config.ts  vite config for main/preload/renderer
+electron-builder.yml installer config (win nsis / mac dmg / linux AppImage)
+scripts/fetch-binaries.ts  postinstall: downloads yt-dlp + ffmpeg into resources/bin/
+
+## shared/
+types.ts            Track, DownloadJob, Settings, ProgressEvent, ImportResult (zod schemas)
+
+## src/main/ (Electron main process — Node.js)
+index.ts            app lifecycle, BrowserWindow, single-instance, security settings
+ipc.ts              all ipcMain.handle() registrations; zod-validates every payload
+binaries.ts         resolve yt-dlp/ffmpeg paths (dev vs packaged)
+import/takeout-csv.ts    parse Google Takeout CSV → Track[]
+import/youtube-cookies.ts  yt-dlp --cookies-from-browser → Track[]
+download/queue.ts        p-queue: concurrency + retry with exponential backoff
+download/downloader.ts   spawn yt-dlp: extract audio → ffmpeg → ID3v2.3 MP3 + art
+download/progress.ts     parse yt-dlp stdout → typed ProgressEvent
+
+## src/preload/
+index.ts            contextBridge: typed minimal API surface (window.mixtape)
+
+## src/renderer/ (React + Tailwind)
+main.tsx            ReactDOM.createRoot entry
+App.tsx             state root, disclaimer check, page routing
+index.css           Tailwind + theme variables
+lib/ipc.ts          typed wrapper: window.mixtape → ipc.*
+pages/Import.tsx    drag-drop CSV or browser connect UI
+pages/Library.tsx   track list, checkboxes, folder picker, download trigger
+pages/Downloads.tsx progress list, real-time updates via IPC push
+pages/Settings.tsx  bitrate, concurrency, output folder, filename template
+components/Button.tsx       variant-aware button
+components/ProgressBar.tsx  animated progress bar
+components/Badge.tsx        DownloadStatus badge
+components/NavBar.tsx       tab navigation with badges
+components/DisclaimerModal.tsx  first-run clickwrap
+
+## docs/
+ARCHITECTURE.md     import→library→queue→download→tagged-MP3 data flow + IPC boundary
+DECISIONS.md        ADR log: local-not-hosted, Electron, 256kbps, exact-ID, no-Selenium
+
+## Legal
+DISCLAIMER.md       personal-use disclaimer
+TERMS.md            terms of use
+THIRD_PARTY_LICENSES  yt-dlp, ffmpeg (LGPL), React, Electron
+NOTICE              trademark notice
+LICENSE             MIT

@@ -1,0 +1,15 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "npm ci --ignore-scripts && echo 'Deps ready. Run: npm run fetch-binaries (or npm install) to also get yt-dlp/ffmpeg)'"
+          }
+        ]
+      }
+    ]
+  }
+}
