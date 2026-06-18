@@ -21,8 +21,8 @@ function TrackRow({
   return (
     <tr
       className={[
-        'border-b border-slate-800 hover:bg-slate-800/50 cursor-pointer',
-        selected ? 'bg-slate-800/30' : '',
+        'border-b border-text/10 hover:bg-surface-2/40 cursor-pointer',
+        selected ? 'bg-surface-2/30' : '',
       ].join(' ')}
       onClick={onToggle}
     >
@@ -32,7 +32,7 @@ function TrackRow({
           checked={selected}
           onChange={onToggle}
           onClick={(e) => e.stopPropagation()}
-          className="rounded accent-violet-500"
+          className="rounded accent-primary"
         />
       </td>
       <td className="px-3 py-2.5">
@@ -44,23 +44,23 @@ function TrackRow({
             loading="lazy"
           />
         ) : (
-          <div className="w-8 h-8 rounded bg-slate-700 flex items-center justify-center">
-            <Music size={14} className="text-slate-400" />
+          <div className="w-8 h-8 rounded bg-surface-2 flex items-center justify-center">
+            <Music size={14} className="text-text-muted" />
           </div>
         )}
       </td>
       <td className="px-3 py-2.5">
         <div className="flex items-center gap-2">
-          <span className="text-sm text-slate-200 font-medium">{track.title}</span>
+          <span className="text-sm text-text font-medium">{track.title}</span>
           {track.isMusicVideo && (
             <span title="Music video, audio may contain video audio track">
-              <AlertTriangle size={13} className="text-amber-400" />
+              <AlertTriangle size={13} className="text-amber-500" />
             </span>
           )}
         </div>
       </td>
-      <td className="px-3 py-2.5 text-sm text-slate-400">{track.artist}</td>
-      <td className="px-3 py-2.5 text-xs text-slate-500 font-mono">{track.videoId}</td>
+      <td className="px-3 py-2.5 text-sm text-text-muted">{track.artist}</td>
+      <td className="px-3 py-2.5 text-xs text-text-muted font-mono">{track.videoId}</td>
     </tr>
   )
 }
@@ -124,7 +124,7 @@ export function LibraryPage({ tracks, onStartDownload }: Props) {
 
   if (tracks.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center h-full gap-4 text-slate-400">
+      <div className="flex flex-col items-center justify-center h-full gap-4 text-text-muted">
         <Music size={48} />
         <p className="text-lg font-medium">No tracks imported yet</p>
         <p className="text-sm">Go to Import to load your library.</p>
@@ -135,20 +135,20 @@ export function LibraryPage({ tracks, onStartDownload }: Props) {
   return (
     <div className="flex flex-col h-full">
       {/* Toolbar */}
-      <div className="flex items-center gap-3 px-4 py-3 border-b border-slate-700 bg-slate-900/50 shrink-0">
+      <div className="flex items-center gap-3 px-4 py-3 border-b border-text/10 bg-surface/40 shrink-0">
         <input
           type="search"
           placeholder="Filter tracks…"
           value={filter}
           onChange={(e) => setFilter(e.target.value)}
-          className="flex-1 bg-slate-700 border border-slate-600 rounded-lg px-3 py-1.5 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-violet-500"
+          className="flex-1 bg-surface-2 border border-text/20 rounded-lg px-3 py-1.5 text-sm text-text placeholder-text-muted focus:outline-none focus:border-primary"
         />
-        <span className="text-sm text-slate-400 whitespace-nowrap">
+        <span className="text-sm text-text-muted whitespace-nowrap">
           {selected.size} / {tracks.length} selected
         </span>
         <button
           onClick={handlePickFolder}
-          className="flex items-center gap-1.5 px-3 py-1.5 text-sm bg-slate-700 hover:bg-slate-600 text-slate-300 rounded-lg transition-colors"
+          className="flex items-center gap-1.5 px-3 py-1.5 text-sm bg-surface-2 hover:bg-surface-2/70 text-text rounded-lg transition-colors"
         >
           <FolderOpen size={15} />
           {outputDir ? outputDir.split(/[\\/]/).pop() : 'Output folder'}
@@ -166,24 +166,24 @@ export function LibraryPage({ tracks, onStartDownload }: Props) {
       {/* Table */}
       <div className="flex-1 overflow-auto">
         <table className="w-full text-left">
-          <thead className="sticky top-0 bg-slate-900 border-b border-slate-700">
+          <thead className="sticky top-0 bg-surface border-b border-text/10">
             <tr>
               <th className="px-4 py-2 w-10">
                 <input
                   type="checkbox"
                   checked={allSelected}
                   onChange={toggleAll}
-                  className="rounded accent-violet-500"
+                  className="rounded accent-primary"
                 />
               </th>
               <th className="px-3 py-2 w-10"></th>
-              <th className="px-3 py-2 text-xs font-semibold text-slate-400 uppercase tracking-wider">
+              <th className="px-3 py-2 text-xs font-semibold text-text-muted uppercase tracking-wider">
                 Title
               </th>
-              <th className="px-3 py-2 text-xs font-semibold text-slate-400 uppercase tracking-wider">
+              <th className="px-3 py-2 text-xs font-semibold text-text-muted uppercase tracking-wider">
                 Artist
               </th>
-              <th className="px-3 py-2 text-xs font-semibold text-slate-400 uppercase tracking-wider">
+              <th className="px-3 py-2 text-xs font-semibold text-text-muted uppercase tracking-wider">
                 Video ID
               </th>
             </tr>
@@ -202,7 +202,7 @@ export function LibraryPage({ tracks, onStartDownload }: Props) {
       </div>
 
       {!outputDir && selected.size > 0 && (
-        <div className="px-4 py-2 bg-amber-900/30 border-t border-amber-700 text-amber-300 text-sm shrink-0">
+        <div className="px-4 py-2 bg-amber-100 border-t border-amber-300 text-amber-800 text-sm shrink-0">
           Pick an output folder before downloading.
         </div>
       )}

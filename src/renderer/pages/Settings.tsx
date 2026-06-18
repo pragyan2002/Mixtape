@@ -42,24 +42,24 @@ export function SettingsPage({ settings, onSaved }: Props) {
 
   return (
     <div className="max-w-lg mx-auto px-6 py-10 space-y-8">
-      <h1 className="text-xl font-bold text-white">Settings</h1>
+      <h1 className="text-xl font-bold text-text">Settings</h1>
 
       <section className="space-y-4">
-        <h2 className="text-sm font-semibold text-slate-400 uppercase tracking-wider">Output</h2>
+        <h2 className="text-sm font-semibold text-text-muted uppercase tracking-wider">Output</h2>
 
         <div className="space-y-2">
-          <label className="block text-sm text-slate-300">Default output folder</label>
+          <label className="block text-sm text-text">Default output folder</label>
           <div className="flex gap-2">
             <input
               type="text"
               value={form.outputFolder}
               readOnly
               placeholder="Not set, will prompt on each download"
-              className="flex-1 bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-sm text-slate-200 placeholder-slate-500 focus:outline-none cursor-default"
+              className="flex-1 bg-surface-2 border border-text/20 rounded-lg px-3 py-2 text-sm text-text placeholder-text-muted focus:outline-none cursor-default"
             />
             <button
               onClick={handlePickFolder}
-              className="flex items-center gap-1.5 px-3 py-2 bg-slate-700 hover:bg-slate-600 border border-slate-600 rounded-lg text-sm text-slate-300 transition-colors"
+              className="flex items-center gap-1.5 px-3 py-2 bg-surface-2 hover:bg-surface-2/70 border border-text/20 rounded-lg text-sm text-text transition-colors"
             >
               <FolderOpen size={15} />
               Browse
@@ -68,11 +68,11 @@ export function SettingsPage({ settings, onSaved }: Props) {
         </div>
 
         <div className="space-y-2">
-          <label className="block text-sm text-slate-300">Filename template</label>
+          <label className="block text-sm text-text">Filename template</label>
           <select
             value={form.filenameTemplate}
             onChange={(e) => update('filenameTemplate', e.target.value as Settings['filenameTemplate'])}
-            className="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-violet-500"
+            className="w-full bg-surface-2 border border-text/20 rounded-lg px-3 py-2 text-sm text-text focus:outline-none focus:border-primary"
           >
             <option value="artist-title">Artist - Title.mp3</option>
             <option value="title-artist">Title - Artist.mp3</option>
@@ -82,11 +82,11 @@ export function SettingsPage({ settings, onSaved }: Props) {
       </section>
 
       <section className="space-y-4">
-        <h2 className="text-sm font-semibold text-slate-400 uppercase tracking-wider">Quality</h2>
+        <h2 className="text-sm font-semibold text-text-muted uppercase tracking-wider">Quality</h2>
 
         <div className="space-y-2">
-          <label className="block text-sm text-slate-300">
-            MP3 bitrate: <span className="text-violet-400 font-mono">{form.bitrate} kbps</span>
+          <label className="block text-sm text-text">
+            MP3 bitrate: <span className="text-primary font-mono">{form.bitrate} kbps</span>
           </label>
           <input
             type="range"
@@ -95,26 +95,26 @@ export function SettingsPage({ settings, onSaved }: Props) {
             step={32}
             value={form.bitrate}
             onChange={(e) => update('bitrate', parseInt(e.target.value))}
-            className="w-full accent-violet-500"
+            className="w-full accent-primary"
           />
-          <div className="flex justify-between text-xs text-slate-500">
+          <div className="flex justify-between text-xs text-text-muted">
             <span>128 kbps</span>
             <span>192 kbps</span>
             <span>256 kbps (default, max)</span>
           </div>
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-text-muted">
             YouTube Music source tops out at ~256 kbps, so that is the max here too.
           </p>
         </div>
       </section>
 
       <section className="space-y-4">
-        <h2 className="text-sm font-semibold text-slate-400 uppercase tracking-wider">Downloads</h2>
+        <h2 className="text-sm font-semibold text-text-muted uppercase tracking-wider">Downloads</h2>
 
         <div className="space-y-2">
-          <label className="block text-sm text-slate-300">
+          <label className="block text-sm text-text">
             Concurrent downloads:{' '}
-            <span className="text-violet-400 font-mono">{form.concurrency}</span>
+            <span className="text-primary font-mono">{form.concurrency}</span>
           </label>
           <input
             type="range"
@@ -123,9 +123,9 @@ export function SettingsPage({ settings, onSaved }: Props) {
             step={1}
             value={form.concurrency}
             onChange={(e) => update('concurrency', parseInt(e.target.value))}
-            className="w-full accent-violet-500"
+            className="w-full accent-primary"
           />
-          <div className="flex justify-between text-xs text-slate-500">
+          <div className="flex justify-between text-xs text-text-muted">
             <span>1 (safe)</span>
             <span>3 (default)</span>
             <span>10 (fast)</span>
