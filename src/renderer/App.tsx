@@ -1,4 +1,5 @@
 import React from 'react'
+import { BackgroundScene } from './components/background/BackgroundScene'
 import { NavBar, type Page } from './components/NavBar'
 import { DisclaimerModal } from './components/DisclaimerModal'
 import { ImportPage } from './pages/Import'
@@ -52,39 +53,43 @@ export default function App() {
     setJobs(updater)
   }
 
-  if (!disclaimerChecked || !settings) {
-    return (
-      <div className="flex h-screen items-center justify-center bg-slate-900">
-        <div className="text-slate-400 animate-pulse">Loading…</div>
-      </div>
-    )
-  }
-
   return (
-    <div className="flex flex-col h-screen bg-slate-900">
-      {disclaimerChecked && !disclaimerAccepted && (
-        <DisclaimerModal onAccepted={() => setDisclaimerAccepted(true)} />
+    <div className="relative z-0 flex flex-col h-screen">
+      <BackgroundScene />
+
+      {!disclaimerChecked || !settings ? (
+        <div className="relative z-10 flex h-full items-center justify-center">
+          <div className="text-text-muted animate-pulse">Loading…</div>
+        </div>
+      ) : (
+        <>
+          {!disclaimerAccepted && (
+            <DisclaimerModal onAccepted={() => setDisclaimerAccepted(true)} />
+          )}
+
+          <NavBar
+            page={page}
+            onChange={setPage}
+            trackCount={tracks.length}
+            downloadCount={
+              jobs.filter((j) => j.status !== 'done' && j.status !== 'cancelled').length
+            }
+          />
+
+          <main className="relative z-10 flex-1 overflow-hidden">
+            {page === 'import' && <ImportPage onImported={handleImported} />}
+            {page === 'library' && (
+              <LibraryPage tracks={tracks} onStartDownload={handleStartDownload} />
+            )}
+            {page === 'downloads' && (
+              <DownloadsPage jobs={jobs} onJobsUpdate={handleJobsUpdate} />
+            )}
+            {page === 'settings' && (
+              <SettingsPage settings={settings} onSaved={setSettings} />
+            )}
+          </main>
+        </>
       )}
-
-      <NavBar
-        page={page}
-        onChange={setPage}
-        trackCount={tracks.length}
-        downloadCount={jobs.filter((j) => j.status !== 'done' && j.status !== 'cancelled').length}
-      />
-
-      <main className="flex-1 overflow-hidden">
-        {page === 'import' && <ImportPage onImported={handleImported} />}
-        {page === 'library' && (
-          <LibraryPage tracks={tracks} onStartDownload={handleStartDownload} />
-        )}
-        {page === 'downloads' && (
-          <DownloadsPage jobs={jobs} onJobsUpdate={handleJobsUpdate} />
-        )}
-        {page === 'settings' && (
-          <SettingsPage settings={settings} onSaved={setSettings} />
-        )}
-      </main>
     </div>
   )
 }

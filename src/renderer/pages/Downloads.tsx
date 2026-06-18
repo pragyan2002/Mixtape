@@ -11,11 +11,11 @@ interface Props {
   onJobsUpdate: (updater: (jobs: DownloadJob[]) => DownloadJob[]) => void
 }
 
-function jobColor(status: DownloadJob['status']): 'violet' | 'emerald' | 'rose' | 'amber' {
+function jobColor(status: DownloadJob['status']): 'primary' | 'emerald' | 'rose' | 'amber' {
   if (status === 'done') return 'emerald'
   if (status === 'failed') return 'rose'
   if (status === 'transcoding') return 'amber'
-  return 'violet'
+  return 'primary'
 }
 
 export function DownloadsPage({ jobs, onJobsUpdate }: Props) {
@@ -52,10 +52,12 @@ export function DownloadsPage({ jobs, onJobsUpdate }: Props) {
 
   if (jobs.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center h-full gap-4 text-slate-400">
-        <Clock size={48} />
-        <p className="text-lg font-medium">No downloads yet</p>
-        <p className="text-sm">Select tracks in Library and click Download.</p>
+      <div className="flex flex-col items-center justify-center h-full gap-4 text-text-muted">
+        <div className="glass rounded-xl px-8 py-6 flex flex-col items-center gap-4">
+          <Clock size={48} />
+          <p className="text-lg font-medium">No downloads yet</p>
+          <p className="text-sm">Select tracks in Library and click Download.</p>
+        </div>
       </div>
     )
   }
@@ -63,9 +65,9 @@ export function DownloadsPage({ jobs, onJobsUpdate }: Props) {
   return (
     <div className="flex flex-col h-full">
       {/* Summary bar */}
-      <div className="flex items-center gap-4 px-4 py-3 border-b border-slate-700 bg-slate-900/50 shrink-0">
+      <div className="glass flex items-center gap-4 px-4 py-3 border-b border-text/10 shrink-0">
         <div className="flex-1 space-y-1">
-          <div className="flex justify-between text-xs text-slate-400 mb-1">
+          <div className="flex justify-between text-xs text-text-muted mb-1">
             <span>
               {done} done · {active} active · {failed} failed · {jobs.length - done - active - failed} queued
             </span>
@@ -73,7 +75,7 @@ export function DownloadsPage({ jobs, onJobsUpdate }: Props) {
           </div>
           <ProgressBar
             value={overall}
-            color={failed > 0 ? 'rose' : done === jobs.length ? 'emerald' : 'violet'}
+            color={failed > 0 ? 'rose' : done === jobs.length ? 'emerald' : 'primary'}
           />
         </div>
         <Button variant="ghost" size="sm" onClick={cancelAll}>
@@ -83,43 +85,43 @@ export function DownloadsPage({ jobs, onJobsUpdate }: Props) {
       </div>
 
       {/* Job list */}
-      <div className="flex-1 overflow-auto divide-y divide-slate-800">
+      <div className="glass flex-1 overflow-auto divide-y divide-text/10">
         {jobs.map((job) => (
-          <div key={job.id} className="flex items-center gap-4 px-4 py-3 hover:bg-slate-800/30">
+          <div key={job.id} className="flex items-center gap-4 px-4 py-3 hover:bg-surface-2/30">
             <div className="shrink-0">
-              {job.status === 'done' && <CheckCircle2 size={18} className="text-emerald-400" />}
-              {job.status === 'failed' && <XCircle size={18} className="text-rose-400" />}
+              {job.status === 'done' && <CheckCircle2 size={18} className="text-emerald-500" />}
+              {job.status === 'failed' && <XCircle size={18} className="text-rose-500" />}
               {(job.status === 'downloading' || job.status === 'transcoding') && (
-                <Loader2 size={18} className="text-violet-400 animate-spin" />
+                <Loader2 size={18} className="text-primary animate-spin" />
               )}
               {(job.status === 'pending' || job.status === 'retrying') && (
-                <Clock size={18} className="text-slate-500" />
+                <Clock size={18} className="text-text-muted" />
               )}
-              {job.status === 'cancelled' && <Ban size={18} className="text-slate-500" />}
+              {job.status === 'cancelled' && <Ban size={18} className="text-text-muted" />}
             </div>
 
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-1">
-                <span className="text-sm text-slate-200 font-medium truncate">{job.track.title}</span>
-                <span className="text-xs text-slate-500 shrink-0">{job.track.artist}</span>
+                <span className="text-sm text-text font-medium truncate">{job.track.title}</span>
+                <span className="text-xs text-text-muted shrink-0">{job.track.artist}</span>
               </div>
               {(job.status === 'downloading' || job.status === 'transcoding') && (
                 <ProgressBar value={job.progress} color={jobColor(job.status)} className="h-1.5" />
               )}
               {job.error && (
-                <p className="text-xs text-rose-400 mt-0.5 truncate">{job.error}</p>
+                <p className="text-xs text-rose-600 mt-0.5 truncate">{job.error}</p>
               )}
             </div>
 
             <div className="shrink-0 flex items-center gap-3">
               {job.speed && (
-                <span className="text-xs text-slate-500 font-mono">{job.speed}</span>
+                <span className="text-xs text-text-muted font-mono">{job.speed}</span>
               )}
               {job.eta && (
-                <span className="text-xs text-slate-500 font-mono">ETA {job.eta}</span>
+                <span className="text-xs text-text-muted font-mono">ETA {job.eta}</span>
               )}
               {job.progress > 0 && job.status !== 'done' && job.status !== 'failed' && (
-                <span className="text-xs text-slate-400 font-mono w-10 text-right">
+                <span className="text-xs text-text-muted font-mono w-10 text-right">
                   {Math.round(job.progress)}%
                 </span>
               )}

@@ -67,9 +67,9 @@ export function ImportPage({ onImported }: Props) {
 
   return (
     <div className="flex flex-col items-center justify-center h-full gap-8 px-8 py-12">
-      <div className="text-center">
-        <h1 className="text-2xl font-bold text-white mb-2">Import Your Music Library</h1>
-        <p className="text-slate-400 max-w-md">
+      <div className="glass rounded-xl px-8 py-6 text-center">
+        <h1 className="text-2xl font-bold text-text mb-2">Import Your Music Library</h1>
+        <p className="text-text-muted max-w-md">
           Choose how to load your YouTube Music library. Takeout CSV is recommended, no login
           needed.
         </p>
@@ -78,15 +78,13 @@ export function ImportPage({ onImported }: Props) {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-2xl">
         {/* Takeout CSV */}
         <div className="space-y-3">
-          <h2 className="text-sm font-semibold text-slate-300 uppercase tracking-wider">
+          <h2 className="text-sm font-semibold text-text-muted uppercase tracking-wider">
             Option 1: Google Takeout CSV
           </h2>
           <div
             className={[
-              'relative border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-colors',
-              dragging
-                ? 'border-violet-400 bg-violet-400/10'
-                : 'border-slate-600 hover:border-slate-500 hover:bg-slate-800/50',
+              'glass relative border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-colors',
+              dragging ? 'border-primary bg-primary/10' : 'border-text/20 hover:border-text/30',
             ].join(' ')}
             onDragOver={(e) => {
               e.preventDefault()
@@ -96,38 +94,38 @@ export function ImportPage({ onImported }: Props) {
             onDrop={handleDrop}
             onClick={loading ? undefined : handlePickFiles}
           >
-            <UploadCloud className="mx-auto mb-3 text-slate-400" size={36} />
-            <p className="text-slate-300 font-medium mb-1">Drop CSV files here</p>
-            <p className="text-slate-500 text-sm">or click to browse</p>
+            <UploadCloud className="mx-auto mb-3 text-text-muted" size={36} />
+            <p className="text-text font-medium mb-1">Drop CSV files here</p>
+            <p className="text-text-muted text-sm">or click to browse</p>
             {loading === 'csv' && (
-              <div className="absolute inset-0 flex items-center justify-center rounded-xl bg-slate-900/80">
-                <span className="text-violet-400 font-medium animate-pulse">Parsing…</span>
+              <div className="absolute inset-0 flex items-center justify-center rounded-xl bg-surface/80">
+                <span className="text-primary font-medium animate-pulse">Parsing…</span>
               </div>
             )}
           </div>
-          <p className="text-slate-500 text-xs">
+          <p className="glass rounded-lg px-3 py-2 text-text-muted text-xs">
             Go to{' '}
-            <span className="text-violet-400">takeout.google.com</span> → YouTube and YouTube Music
+            <span className="text-primary">takeout.google.com</span> → YouTube and YouTube Music
             → Export playlists CSVs.
           </p>
         </div>
 
         {/* Browser cookies */}
         <div className="space-y-3">
-          <h2 className="text-sm font-semibold text-slate-300 uppercase tracking-wider">
+          <h2 className="text-sm font-semibold text-text-muted uppercase tracking-wider">
             Option 2: Connect via Browser
           </h2>
-          <div className="border border-slate-700 rounded-xl p-6 space-y-4">
-            <div className="flex items-center gap-2 text-slate-400">
+          <div className="glass border border-text/10 rounded-xl p-6 space-y-4">
+            <div className="flex items-center gap-2 text-text-muted">
               <Globe size={20} />
               <span className="text-sm">Reads your browser&apos;s YouTube cookies</span>
             </div>
             <div>
-              <label className="block text-xs text-slate-400 mb-1">Browser</label>
+              <label className="block text-xs text-text-muted mb-1">Browser</label>
               <select
                 value={browser}
                 onChange={(e) => setBrowser(e.target.value as Browser)}
-                className="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-violet-500"
+                className="w-full bg-surface-2 border border-text/20 rounded-lg px-3 py-2 text-sm text-text focus:outline-none focus:border-primary"
               >
                 {BROWSERS.map((b) => (
                   <option key={b.value} value={b.value}>
@@ -145,7 +143,7 @@ export function ImportPage({ onImported }: Props) {
               <Chrome size={16} />
               Connect YouTube Music
             </Button>
-            <p className="text-slate-500 text-xs">
+            <p className="text-text-muted text-xs">
               Make sure you&apos;re logged into YouTube Music in your selected browser. The app reads
               cookies locally, nothing is sent externally.
             </p>
@@ -154,9 +152,9 @@ export function ImportPage({ onImported }: Props) {
       </div>
 
       {errors.length > 0 && (
-        <div className="w-full max-w-2xl bg-rose-900/30 border border-rose-700 rounded-xl p-4">
-          <p className="text-rose-400 text-sm font-semibold mb-2">Import issues:</p>
-          <ul className="text-rose-300 text-sm space-y-1 max-h-32 overflow-y-auto">
+        <div className="w-full max-w-2xl bg-rose-100 border border-rose-300 rounded-xl p-4">
+          <p className="text-rose-700 text-sm font-semibold mb-2">Import issues:</p>
+          <ul className="text-rose-600 text-sm space-y-1 max-h-32 overflow-y-auto">
             {errors.map((e, i) => (
               <li key={i}>{e}</li>
             ))}
