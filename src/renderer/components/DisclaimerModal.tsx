@@ -21,13 +21,13 @@ export function DisclaimerModal({ onAccepted }: Props) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80">
-      <div className="bg-slate-800 border border-slate-700 rounded-xl shadow-2xl max-w-lg w-full mx-4 p-6 space-y-5">
+      <div className="glass rounded-xl shadow-2xl max-w-lg w-full mx-4 p-6 space-y-5">
         <div className="flex items-center gap-3">
           <span className="text-2xl">🎵</span>
-          <h1 className="text-xl font-bold text-white">Mixtape: Personal Use Notice</h1>
+          <h1 className="text-xl font-bold text-text">Mixtape: Personal Use Notice</h1>
         </div>
 
-        <div className="text-slate-300 text-sm space-y-3 max-h-64 overflow-y-auto pr-1">
+        <div className="text-text text-sm space-y-3 max-h-64 overflow-y-auto pr-1">
           <p>
             Mixtape downloads audio from YouTube Music for <strong>personal, lawful use only</strong>.
             Before continuing, please read and agree to the following:
@@ -51,10 +51,10 @@ export function DisclaimerModal({ onAccepted }: Props) {
               iPod). Respect copyright law in your jurisdiction.
             </li>
           </ul>
-          <p className="text-slate-400 text-xs">
+          <p className="text-text-muted text-xs">
             By clicking "I Accept", you confirm you have read and agree to the{' '}
-            <span className="text-violet-400">terms above</span> and the app&apos;s{' '}
-            <span className="text-violet-400">MIT License</span>.
+            <span className="text-primary">terms above</span> and the app&apos;s{' '}
+            <span className="text-primary">MIT License</span>.
           </p>
         </div>
 
