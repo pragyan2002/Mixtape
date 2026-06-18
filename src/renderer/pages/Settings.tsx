@@ -41,7 +41,7 @@ export function SettingsPage({ settings, onSaved }: Props) {
   }
 
   return (
-    <div className="max-w-lg mx-auto px-6 py-10 space-y-8">
+    <div className="glass max-w-lg mx-auto rounded-xl px-6 py-10 space-y-8 max-h-full overflow-y-auto">
       <h1 className="text-xl font-bold text-text">Settings</h1>
 
       <section className="space-y-4">

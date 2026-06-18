@@ -53,9 +53,11 @@ export function DownloadsPage({ jobs, onJobsUpdate }: Props) {
   if (jobs.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center h-full gap-4 text-text-muted">
-        <Clock size={48} />
-        <p className="text-lg font-medium">No downloads yet</p>
-        <p className="text-sm">Select tracks in Library and click Download.</p>
+        <div className="glass rounded-xl px-8 py-6 flex flex-col items-center gap-4">
+          <Clock size={48} />
+          <p className="text-lg font-medium">No downloads yet</p>
+          <p className="text-sm">Select tracks in Library and click Download.</p>
+        </div>
       </div>
     )
   }
@@ -63,7 +65,7 @@ export function DownloadsPage({ jobs, onJobsUpdate }: Props) {
   return (
     <div className="flex flex-col h-full">
       {/* Summary bar */}
-      <div className="flex items-center gap-4 px-4 py-3 border-b border-text/10 bg-surface/40 shrink-0">
+      <div className="glass flex items-center gap-4 px-4 py-3 border-b border-text/10 shrink-0">
         <div className="flex-1 space-y-1">
           <div className="flex justify-between text-xs text-text-muted mb-1">
             <span>
@@ -83,7 +85,7 @@ export function DownloadsPage({ jobs, onJobsUpdate }: Props) {
       </div>
 
       {/* Job list */}
-      <div className="flex-1 overflow-auto divide-y divide-text/10">
+      <div className="glass flex-1 overflow-auto divide-y divide-text/10">
         {jobs.map((job) => (
           <div key={job.id} className="flex items-center gap-4 px-4 py-3 hover:bg-surface-2/30">
             <div className="shrink-0">

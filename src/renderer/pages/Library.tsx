@@ -125,9 +125,11 @@ export function LibraryPage({ tracks, onStartDownload }: Props) {
   if (tracks.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center h-full gap-4 text-text-muted">
-        <Music size={48} />
-        <p className="text-lg font-medium">No tracks imported yet</p>
-        <p className="text-sm">Go to Import to load your library.</p>
+        <div className="glass rounded-xl px-8 py-6 flex flex-col items-center gap-4">
+          <Music size={48} />
+          <p className="text-lg font-medium">No tracks imported yet</p>
+          <p className="text-sm">Go to Import to load your library.</p>
+        </div>
       </div>
     )
   }
@@ -135,7 +137,7 @@ export function LibraryPage({ tracks, onStartDownload }: Props) {
   return (
     <div className="flex flex-col h-full">
       {/* Toolbar */}
-      <div className="flex items-center gap-3 px-4 py-3 border-b border-text/10 bg-surface/40 shrink-0">
+      <div className="glass flex items-center gap-3 px-4 py-3 border-b border-text/10 shrink-0">
         <input
           type="search"
           placeholder="Filter tracks…"
@@ -164,7 +166,7 @@ export function LibraryPage({ tracks, onStartDownload }: Props) {
       </div>
 
       {/* Table */}
-      <div className="flex-1 overflow-auto">
+      <div className="glass flex-1 overflow-auto">
         <table className="w-full text-left">
           <thead className="sticky top-0 bg-surface border-b border-text/10">
             <tr>

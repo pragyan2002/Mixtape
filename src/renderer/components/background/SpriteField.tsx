@@ -48,6 +48,7 @@ function SpriteVisual({ kind }: { kind: SpriteKind }) {
     return (
       <img
         src={kind.src}
+        srcSet={kind.srcSet}
         alt=""
         loading="lazy"
         decoding="async"

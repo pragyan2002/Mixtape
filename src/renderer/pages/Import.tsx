@@ -67,7 +67,7 @@ export function ImportPage({ onImported }: Props) {
 
   return (
     <div className="flex flex-col items-center justify-center h-full gap-8 px-8 py-12">
-      <div className="text-center">
+      <div className="glass rounded-xl px-8 py-6 text-center">
         <h1 className="text-2xl font-bold text-text mb-2">Import Your Music Library</h1>
         <p className="text-text-muted max-w-md">
           Choose how to load your YouTube Music library. Takeout CSV is recommended, no login
@@ -83,10 +83,8 @@ export function ImportPage({ onImported }: Props) {
           </h2>
           <div
             className={[
-              'relative border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-colors',
-              dragging
-                ? 'border-primary bg-primary/10'
-                : 'border-text/20 hover:border-text/30 hover:bg-surface-2/30',
+              'glass relative border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-colors',
+              dragging ? 'border-primary bg-primary/10' : 'border-text/20 hover:border-text/30',
             ].join(' ')}
             onDragOver={(e) => {
               e.preventDefault()
@@ -105,7 +103,7 @@ export function ImportPage({ onImported }: Props) {
               </div>
             )}
           </div>
-          <p className="text-text-muted text-xs">
+          <p className="glass rounded-lg px-3 py-2 text-text-muted text-xs">
             Go to{' '}
             <span className="text-primary">takeout.google.com</span> → YouTube and YouTube Music
             → Export playlists CSVs.
@@ -117,7 +115,7 @@ export function ImportPage({ onImported }: Props) {
           <h2 className="text-sm font-semibold text-text-muted uppercase tracking-wider">
             Option 2: Connect via Browser
           </h2>
-          <div className="border border-text/10 rounded-xl p-6 space-y-4">
+          <div className="glass border border-text/10 rounded-xl p-6 space-y-4">
             <div className="flex items-center gap-2 text-text-muted">
               <Globe size={20} />
               <span className="text-sm">Reads your browser&apos;s YouTube cookies</span>
