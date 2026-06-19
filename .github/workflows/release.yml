@@ -4,6 +4,12 @@ on:
   push:
     tags:
       - "v*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag to create/publish (e.g. v1.0.1)"
+        required: true
+        type: string
 
 permissions:
   contents: write
@@ -57,4 +63,7 @@ jobs:
       - name: Publish to GitHub Release
         uses: softprops/action-gh-release@v2
         with:
+          # On tag pushes this is the pushed tag; on manual dispatch we create
+          # the tag from the provided input (pointing at the dispatched ref).
+          tag_name: ${{ inputs.tag || github.ref_name }}
           files: artifacts/**/*
