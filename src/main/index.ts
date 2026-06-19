@@ -1,6 +1,35 @@
 import { app, BrowserWindow, shell } from 'electron'
 import * as path from 'path'
+import * as fs from 'fs'
 import { registerIpcHandlers } from './ipc'
+
+/**
+ * Resolve the built renderer entry (index.html) across the packaging layouts
+ * electron-builder can produce. Depending on how `files`/`asar` are configured,
+ * the compiled main process may sit at `app.asar/out/main` or `app.asar/main`,
+ * so the renderer can be a sibling at `../renderer` or `../../out/renderer`.
+ * Loading a path that doesn't exist inside the asar surfaces to the user as
+ * "Not allowed to load local resource", so probe the candidates and pick the
+ * first that actually exists rather than trusting a single relative guess.
+ */
+function resolveRendererIndex(): string {
+  const candidates = [
+    path.join(__dirname, '../renderer/index.html'),
+    path.join(__dirname, '../../renderer/index.html'),
+    path.join(__dirname, '../../out/renderer/index.html'),
+    path.join(app.getAppPath(), 'out/renderer/index.html'),
+    path.join(app.getAppPath(), 'renderer/index.html'),
+  ]
+  for (const candidate of candidates) {
+    if (fs.existsSync(candidate)) return candidate
+  }
+  // None found: return the primary expected path so loadFile emits a clear,
+  // actionable error instead of silently loading nothing.
+  console.error(
+    '[mixtape] renderer index.html not found. Searched:\n' + candidates.join('\n'),
+  )
+  return candidates[0]
+}
 
 const SINGLE_INSTANCE = app.requestSingleInstanceLock()
 if (!SINGLE_INSTANCE) {
@@ -41,10 +70,17 @@ function createWindow(): BrowserWindow {
     return { action: 'deny' }
   })
 
+  // Surface load failures (missing/blocked resources) instead of a blank window.
+  win.webContents.on('did-fail-load', (_e, errorCode, errorDescription, validatedURL) => {
+    console.error(
+      `[mixtape] renderer failed to load (${errorCode} ${errorDescription}): ${validatedURL}`,
+    )
+  })
+
   if (process.env['ELECTRON_RENDERER_URL']) {
     win.loadURL(process.env['ELECTRON_RENDERER_URL'])
   } else {
-    win.loadFile(path.join(__dirname, '../renderer/index.html'))
+    win.loadFile(resolveRendererIndex())
   }
 
   return win
