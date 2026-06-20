@@ -1,7 +1,7 @@
 import * as path from 'path'
 import * as fs from 'fs'
 import { spawn } from 'child_process'
-import { ytDlpPath, ffmpegPath } from '../binaries'
+import { ytDlpPath, ffmpegPath, sidecarEnv } from '../binaries'
 import { parseProgress } from './progress'
 import { buildFilename, assertInsideOutputDir } from './filename'
 import { recordDownload } from './manifest'
@@ -73,7 +73,7 @@ export async function runDownload(
 
   return new Promise<string>((resolve, reject) => {
     const child = spawn(ytDlpPath(), args, {
-      env: { ...process.env },
+      env: sidecarEnv(),
       shell: false,
     })
 

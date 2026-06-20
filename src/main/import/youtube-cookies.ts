@@ -1,5 +1,5 @@
 import { spawn } from 'child_process'
-import { ytDlpPath } from '../binaries'
+import { ytDlpPath, sidecarEnv } from '../binaries'
 import type { Track, ImportResult, Browser } from '../../../shared/types'
 import { VideoIdSchema } from '../../../shared/types'
 
@@ -64,7 +64,7 @@ async function runYtDlpFlatPlaylist(url: string, browser: Browser): Promise<YtDl
     ]
 
     const child = spawn(ytDlpPath(), args, {
-      env: { ...process.env },
+      env: sidecarEnv(),
       shell: false,
     })
 
