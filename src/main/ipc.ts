@@ -130,7 +130,7 @@ export function registerIpcHandlers(win: BrowserWindow): void {
   })
 
   ipcMain.handle('download:checkExisting', (_e, payload: unknown) => {
-    const { jobs, outputDir, filenameTemplate } = z
+    const { jobs, outputDir } = z
       .object({
         jobs: z.array(DownloadJobSchema),
         outputDir: z.string().min(1),
@@ -139,7 +139,7 @@ export function registerIpcHandlers(win: BrowserWindow): void {
       .parse(payload)
 
     const existingJobIds = jobs
-      .filter((job) => findExisting(outputDir, job, filenameTemplate) !== null)
+      .filter((job) => findExisting(outputDir, job) !== null)
       .map((job) => job.id)
 
     return { total: jobs.length, existingJobIds }

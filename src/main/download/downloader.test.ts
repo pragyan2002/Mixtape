@@ -42,4 +42,19 @@ describe('resolveOutputPath', () => {
     const resolved = resolveOutputPath(makeJob('Song', 'Artist'), opts, new Set())
     expect(path.basename(resolved)).toBe('Artist - Song (2).mp3')
   })
+
+  it('treats case-only-different names as colliding on case-insensitive volumes', () => {
+    const original = process.platform
+    Object.defineProperty(process, 'platform', { value: 'darwin', configurable: true })
+    try {
+      const taken = new Set<string>()
+      const a = resolveOutputPath(makeJob('Song', 'Artist'), opts, taken)
+      const b = resolveOutputPath(makeJob('song', 'artist'), opts, taken)
+      expect(path.basename(a)).toBe('Artist - Song.mp3')
+      // Differs only by case → must get a suffix instead of the same path.
+      expect(path.basename(b)).toBe('artist - song (2).mp3')
+    } finally {
+      Object.defineProperty(process, 'platform', { value: original, configurable: true })
+    }
+  })
 })

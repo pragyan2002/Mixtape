@@ -30,14 +30,20 @@ export function resolveOutputPath(
   const ext = path.extname(base)
   const stem = base.slice(0, base.length - ext.length)
 
+  // Windows and default macOS volumes are case-insensitive, so two names that
+  // differ only by case map to the same file. Key reservations case-folded there
+  // (while still returning the original-cased path) to avoid a collision.
+  const insensitive = process.platform === 'win32' || process.platform === 'darwin'
+  const fold = (p: string): string => (insensitive ? p.toLowerCase() : p)
+
   let candidate = base
   let n = 2
-  while (taken.has(candidate) || fs.existsSync(candidate)) {
+  while (taken.has(fold(candidate)) || fs.existsSync(candidate)) {
     candidate = `${stem} (${n})${ext}`
     n++
   }
 
-  taken.add(candidate)
+  taken.add(fold(candidate))
   return candidate
 }
 

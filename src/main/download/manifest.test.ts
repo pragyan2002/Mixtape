@@ -42,7 +42,7 @@ describe('manifest', () => {
 
     // New import now has the real artist + uses the artist-title template.
     const job = makeJob('dQw4w9WgXcQ', 'Never Gonna Give You Up', 'Rick Astley')
-    const found = findExisting(dir, job, 'artist-title')
+    const found = findExisting(dir, job)
 
     expect(found).toBe(legacy)
     // And it back-fills the manifest so future lookups resolve by video ID.
@@ -51,8 +51,33 @@ describe('manifest', () => {
     )
   })
 
+  it('finds a legacy "Title - Unknown Artist" file from an old title-artist import', () => {
+    // Old app used the title-artist template → "Title - Unknown Artist.mp3".
+    const legacy = path.join(dir, 'Never Gonna Give You Up - Unknown Artist.mp3')
+    fs.writeFileSync(legacy, '')
+
+    // Current template is artist-title and the artist is now known.
+    const job = makeJob('dQw4w9WgXcQ', 'Never Gonna Give You Up', 'Rick Astley')
+    expect(findExisting(dir, job)).toBe(legacy)
+  })
+
+  it('does not claim a file already owned by a different video', () => {
+    // A file exists and the manifest already maps it to another video ID.
+    const file = path.join(dir, 'Artist - Same Name.mp3')
+    fs.writeFileSync(file, '')
+    const owner = makeJob('aaaaaaaaaaa', 'Same Name', 'Artist')
+    recordDownload(dir, owner.track.videoId, file, owner.track)
+
+    // A distinct video that maps to the same filename must NOT be skipped…
+    const other = makeJob('bbbbbbbbbbb', 'Same Name', 'Artist')
+    expect(findExisting(dir, other)).toBeNull()
+    // …and the original mapping must stay intact (no corruption).
+    expect(readManifest(dir)['aaaaaaaaaaa'].filename).toBe('Artist - Same Name.mp3')
+    expect(readManifest(dir)['bbbbbbbbbbb']).toBeUndefined()
+  })
+
   it('returns null when the song is not present in any scheme', () => {
     const job = makeJob('9bZkp7q19f0', 'Gangnam Style', 'PSY')
-    expect(findExisting(dir, job, 'artist-title')).toBeNull()
+    expect(findExisting(dir, job)).toBeNull()
   })
 })

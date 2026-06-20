@@ -60,17 +60,14 @@ export function recordDownload(
 
 /**
  * Determine whether a song already exists in `outputDir`, independent of the
- * current naming scheme. Order:
+ * naming scheme it was downloaded under. Order:
  *   1. Manifest hit by video ID whose file is still on disk.
- *   2. Probe disk under every known template AND the legacy `Unknown Artist - <title>`
- *      form. A hit here is back-filled into the manifest (self-healing migration).
+ *   2. Probe disk under every template, with the real artist AND the legacy
+ *      `Unknown Artist` form. An unambiguous hit is back-filled into the manifest
+ *      (self-healing migration); a file already owned by another video is skipped.
  * Returns the absolute path of the existing file, or `null`.
  */
-export function findExisting(
-  outputDir: string,
-  job: DownloadJob,
-  template: string,
-): string | null {
+export function findExisting(outputDir: string, job: DownloadJob): string | null {
   const manifest = readManifest(outputDir)
 
   const recorded = manifest[job.track.videoId]
@@ -79,21 +76,29 @@ export function findExisting(
     if (fs.existsSync(recordedPath)) return recordedPath
   }
 
-  // Candidate names under all templates + the legacy Unknown Artist scheme.
+  // Candidate names under every template, with the real artist AND the legacy
+  // `Unknown Artist` scheme, so old downloads made under any template are matched.
   const candidates = new Set<string>()
-  for (const t of FILENAME_TEMPLATES) candidates.add(buildFilename(job.track, t))
-  candidates.add(
-    buildFilename({ ...job.track, artist: 'Unknown Artist' }, template),
-  )
-  candidates.add(buildFilename({ ...job.track, artist: 'Unknown Artist' }, 'artist-title'))
+  for (const t of FILENAME_TEMPLATES) {
+    candidates.add(buildFilename(job.track, t))
+    candidates.add(buildFilename({ ...job.track, artist: 'Unknown Artist' }, t))
+  }
 
   for (const filename of candidates) {
     const candidatePath = assertInsideOutputDir(outputDir, filename)
-    if (fs.existsSync(candidatePath)) {
-      // Back-fill so subsequent checks resolve by video ID directly.
-      recordDownload(outputDir, job.track.videoId, candidatePath, job.track)
-      return candidatePath
-    }
+    if (!fs.existsSync(candidatePath)) continue
+
+    // A filename-only match is ambiguous: if another video already owns this exact
+    // file, it belongs to a different track — don't claim it (let this one download
+    // with a numbered suffix) and don't corrupt the manifest.
+    const claimedByOther = Object.entries(manifest).some(
+      ([vid, entry]) => vid !== job.track.videoId && entry.filename === filename,
+    )
+    if (claimedByOther) continue
+
+    // Back-fill so subsequent checks resolve by video ID directly.
+    recordDownload(outputDir, job.track.videoId, candidatePath, job.track)
+    return candidatePath
   }
 
   return null
