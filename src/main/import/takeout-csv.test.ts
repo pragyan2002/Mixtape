@@ -27,17 +27,25 @@ dQw4w9WgXcQ,2024-01-01T00:00:00+00:00,Never Gonna Give You Up
 const HEADER_ONLY_CSV = `Video Id,Time Added
 `
 
+const ARTIST_CSV = `Video Id,Video Title,Artist
+dQw4w9WgXcQ,Never Gonna Give You Up,Rick Astley
+9bZkp7q19f0,Gangnam Style,
+`
+
 let samplePath: string
 let emptyPath: string
+let artistPath: string
 
 beforeAll(() => {
   samplePath = writeCsv('sample', SAMPLE_CSV)
   emptyPath = writeCsv('empty', HEADER_ONLY_CSV)
+  artistPath = writeCsv('artist', ARTIST_CSV)
 })
 
 afterAll(() => {
   fs.unlinkSync(samplePath)
   fs.unlinkSync(emptyPath)
+  fs.unlinkSync(artistPath)
 })
 
 describe('parseTakeoutCsv', () => {
@@ -48,6 +56,18 @@ describe('parseTakeoutCsv', () => {
     expect(result.tracks[0].title).toBe('Never Gonna Give You Up')
     expect(result.tracks[1].videoId).toBe('9bZkp7q19f0')
     expect(result.errors).toHaveLength(0)
+  })
+
+  it('falls back to Unknown Artist when there is no artist column', () => {
+    const result = parseTakeoutCsv([samplePath])
+    expect(result.tracks[0].artist).toBe('Unknown Artist')
+  })
+
+  it('extracts the artist column when present, else falls back', () => {
+    const result = parseTakeoutCsv([artistPath])
+    expect(result.tracks).toHaveLength(2)
+    expect(result.tracks[0].artist).toBe('Rick Astley')
+    expect(result.tracks[1].artist).toBe('Unknown Artist')
   })
 
   it('deduplicates tracks across multiple files', () => {

@@ -5,6 +5,7 @@ import { parseTakeoutCsv } from './import/takeout-csv'
 import { fetchLibraryFromCookies } from './import/youtube-cookies'
 import { createQueue } from './download/queue'
 import type { QueueController } from './download/queue'
+import { findExisting } from './download/manifest'
 import {
   SettingsSchema,
   DownloadJobSchema,
@@ -110,9 +111,38 @@ export function registerIpcHandlers(win: BrowserWindow): void {
     queueController.addJobs(jobs, { outputDir, bitrate, filenameTemplate })
   })
 
+  ipcMain.handle('download:retry', (_e, jobIds: unknown) => {
+    const ids = z.array(z.string()).parse(jobIds)
+    queueController?.retry(ids)
+  })
+
   ipcMain.handle('download:cancel', (_e, jobIds: unknown) => {
     const ids = z.array(z.string()).parse(jobIds)
     queueController?.cancel(ids)
+  })
+
+  ipcMain.handle('download:pause', () => {
+    queueController?.pause()
+  })
+
+  ipcMain.handle('download:resume', () => {
+    queueController?.resume()
+  })
+
+  ipcMain.handle('download:checkExisting', (_e, payload: unknown) => {
+    const { jobs, outputDir } = z
+      .object({
+        jobs: z.array(DownloadJobSchema),
+        outputDir: z.string().min(1),
+        filenameTemplate: z.string(),
+      })
+      .parse(payload)
+
+    const existingJobIds = jobs
+      .filter((job) => findExisting(outputDir, job) !== null)
+      .map((job) => job.id)
+
+    return { total: jobs.length, existingJobIds }
   })
 
   ipcMain.handle('download:clearQueue', () => {

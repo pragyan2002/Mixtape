@@ -45,6 +45,7 @@ function parseOneFile(filePath: string, seen: Set<string>): ImportResult {
   let headerIdx = -1
   let videoIdCol = -1
   let titleCol = -1
+  let artistCol = -1
 
   for (let i = 0; i < rows.length; i++) {
     const row = rows[i]
@@ -54,6 +55,9 @@ function parseOneFile(filePath: string, seen: Set<string>): ImportResult {
       headerIdx = i
       videoIdCol = vidIdx
       titleCol = lower.findIndex((c) => c.includes('title') && !c.includes('playlist'))
+      artistCol = lower.findIndex(
+        (c) => c.includes('artist') || c === 'channel' || c.includes('uploader'),
+      )
       break
     }
   }
@@ -86,10 +90,13 @@ function parseOneFile(filePath: string, seen: Set<string>): ImportResult {
     const rawTitle = titleCol >= 0 ? row[titleCol]?.trim() : ''
     const title = rawTitle || videoId
 
+    const rawArtist = artistCol >= 0 ? row[artistCol]?.trim() : ''
+    const artist = rawArtist || 'Unknown Artist'
+
     tracks.push({
       videoId,
       title,
-      artist: 'Unknown Artist',
+      artist,
       isMusicVideo: false,
     })
   }

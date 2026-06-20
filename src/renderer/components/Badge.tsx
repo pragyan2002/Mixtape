@@ -13,6 +13,7 @@ const config: Record<DownloadStatus, { label: string; className: string }> = {
   failed: { label: 'Failed', className: 'bg-rose-600 text-rose-100' },
   retrying: { label: 'Retrying', className: 'bg-orange-600 text-orange-100' },
   cancelled: { label: 'Cancelled', className: 'bg-surface-2/80 text-text-muted' },
+  skipped: { label: 'Skipped', className: 'bg-surface-2 text-text-muted' },
 }
 
 export function StatusBadge({ status }: BadgeProps) {

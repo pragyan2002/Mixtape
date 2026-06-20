@@ -1,5 +1,5 @@
 import PQueue from 'p-queue'
-import { runDownload, DownloadOptions } from './downloader'
+import { runDownload, resolveOutputPath, DownloadOptions } from './downloader'
 import type { DownloadJob, ProgressEvent } from '../../../shared/types'
 
 const MAX_ATTEMPTS = 3
@@ -7,7 +7,10 @@ const BACKOFF_BASE_MS = 2000
 
 export interface QueueController {
   addJobs: (jobs: DownloadJob[], opts: DownloadOptions) => void
+  retry: (jobIds: string[]) => void
   cancel: (jobIds: string[]) => void
+  pause: () => void
+  resume: () => void
   setConcurrency: (n: number) => void
   clear: () => void
 }
@@ -18,8 +21,20 @@ export function createQueue(
 ): QueueController {
   const queue = new PQueue({ concurrency })
   const cancelled = new Set<string>()
+  // Output paths reserved this session so distinct songs never collide on disk.
+  const usedPaths = new Set<string>()
+  // Original job + options + resolved output path, so failed jobs can be re-queued
+  // with the same settings and reuse their reserved filename (no spurious suffix).
+  const jobRegistry = new Map<
+    string,
+    { job: DownloadJob; opts: DownloadOptions; outputPath: string }
+  >()
 
-  async function runWithRetry(job: DownloadJob, opts: DownloadOptions): Promise<void> {
+  async function runWithRetry(
+    job: DownloadJob,
+    opts: DownloadOptions,
+    outputPath: string,
+  ): Promise<void> {
     for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
       if (cancelled.has(job.id)) {
         onProgress({ jobId: job.id, percent: 0, status: 'cancelled' })
@@ -34,7 +49,7 @@ export function createQueue(
           onProgress({ jobId: job.id, percent: 0, status: 'downloading' })
         }
 
-        const outputPath = await runDownload(job, opts, onProgress)
+        await runDownload(job, opts, outputPath, onProgress)
         onProgress({ jobId: job.id, percent: 100, status: 'done', outputPath })
         return
       } catch (err) {
@@ -50,14 +65,35 @@ export function createQueue(
     }
   }
 
+  function enqueue(job: DownloadJob, opts: DownloadOptions, outputPath?: string): void {
+    // Reserve the filename once, on first enqueue, and reuse it on retry.
+    const resolved = outputPath ?? resolveOutputPath(job, opts, usedPaths)
+    jobRegistry.set(job.id, { job, opts, outputPath: resolved })
+    queue.add(() => runWithRetry(job, opts, resolved))
+  }
+
   return {
     addJobs(jobs, opts) {
-      for (const job of jobs) {
-        queue.add(() => runWithRetry(job, opts))
+      for (const job of jobs) enqueue(job, opts)
+    },
+    retry(jobIds) {
+      for (const id of jobIds) {
+        const entry = jobRegistry.get(id)
+        if (!entry) continue
+        cancelled.delete(id)
+        entry.job.attempt += 1
+        onProgress({ jobId: id, percent: 0, status: 'pending' })
+        enqueue(entry.job, entry.opts, entry.outputPath)
       }
     },
     cancel(jobIds) {
       for (const id of jobIds) cancelled.add(id)
+    },
+    pause() {
+      queue.pause()
+    },
+    resume() {
+      queue.start()
     },
     setConcurrency(n) {
       queue.concurrency = n
