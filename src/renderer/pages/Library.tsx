@@ -1,11 +1,13 @@
 import React from 'react'
 import { Music, AlertTriangle, FolderOpen, Download } from 'lucide-react'
 import { Button } from '../components/Button'
+import { ExistingFilesModal } from '../components/ExistingFilesModal'
 import { ipc } from '../lib/ipc'
 import type { Track, DownloadJob } from '../../../shared/types'
 
 interface Props {
   tracks: Track[]
+  filenameTemplate: string
   onStartDownload: (jobs: DownloadJob[], outputDir: string) => void
 }
 
@@ -65,10 +67,15 @@ function TrackRow({
   )
 }
 
-export function LibraryPage({ tracks, onStartDownload }: Props) {
+export function LibraryPage({ tracks, filenameTemplate, onStartDownload }: Props) {
   const [selected, setSelected] = React.useState<Set<string>>(new Set())
   const [outputDir, setOutputDir] = React.useState('')
   const [filter, setFilter] = React.useState('')
+  const [checking, setChecking] = React.useState(false)
+  const [pending, setPending] = React.useState<{
+    jobs: DownloadJob[]
+    existingIds: Set<string>
+  } | null>(null)
 
   const filtered = React.useMemo(() => {
     if (!filter) return tracks
@@ -110,7 +117,7 @@ export function LibraryPage({ tracks, onStartDownload }: Props) {
     if (folder) setOutputDir(folder)
   }
 
-  function handleDownload() {
+  async function handleDownload() {
     const toDownload = tracks.filter((t) => selected.has(t.videoId))
     const jobs: DownloadJob[] = toDownload.map((track) => ({
       id: crypto.randomUUID(),
@@ -119,6 +126,37 @@ export function LibraryPage({ tracks, onStartDownload }: Props) {
       progress: 0,
       attempt: 0,
     }))
+
+    setChecking(true)
+    try {
+      const { existingJobIds } = await ipc.download.checkExisting({
+        jobs,
+        outputDir,
+        filenameTemplate,
+      })
+      if (existingJobIds.length > 0) {
+        setPending({ jobs, existingIds: new Set(existingJobIds) })
+        return
+      }
+      onStartDownload(jobs, outputDir)
+    } finally {
+      setChecking(false)
+    }
+  }
+
+  function startSkippingExisting() {
+    if (!pending) return
+    const jobs = pending.jobs.map((j) =>
+      pending.existingIds.has(j.id) ? { ...j, status: 'skipped' as const } : j,
+    )
+    setPending(null)
+    onStartDownload(jobs, outputDir)
+  }
+
+  function startDownloadingAll() {
+    if (!pending) return
+    const jobs = pending.jobs
+    setPending(null)
     onStartDownload(jobs, outputDir)
   }
 
@@ -157,6 +195,7 @@ export function LibraryPage({ tracks, onStartDownload }: Props) {
         </button>
         <Button
           variant="primary"
+          loading={checking}
           disabled={selected.size === 0 || !outputDir}
           onClick={handleDownload}
         >
@@ -207,6 +246,16 @@ export function LibraryPage({ tracks, onStartDownload }: Props) {
         <div className="px-4 py-2 bg-amber-100 border-t border-amber-300 text-amber-800 text-sm shrink-0">
           Pick an output folder before downloading.
         </div>
+      )}
+
+      {pending && (
+        <ExistingFilesModal
+          existingCount={pending.existingIds.size}
+          total={pending.jobs.length}
+          onSkipExisting={startSkippingExisting}
+          onDownloadAll={startDownloadingAll}
+          onCancel={() => setPending(null)}
+        />
       )}
     </div>
   )

@@ -35,7 +35,16 @@ const api = {
       bitrate: number
       filenameTemplate: string
     }): Promise<void> => ipcRenderer.invoke('download:start', payload),
+    checkExisting: (payload: {
+      jobs: DownloadJob[]
+      outputDir: string
+      filenameTemplate: string
+    }): Promise<{ total: number; existingJobIds: string[] }> =>
+      ipcRenderer.invoke('download:checkExisting', payload),
+    retry: (jobIds: string[]): Promise<void> => ipcRenderer.invoke('download:retry', jobIds),
     cancel: (jobIds: string[]): Promise<void> => ipcRenderer.invoke('download:cancel', jobIds),
+    pause: (): Promise<void> => ipcRenderer.invoke('download:pause'),
+    resume: (): Promise<void> => ipcRenderer.invoke('download:resume'),
     clearQueue: (): Promise<void> => ipcRenderer.invoke('download:clearQueue'),
     onProgress: (cb: (event: ProgressEvent) => void): (() => void) => {
       const handler = (_e: Electron.IpcRendererEvent, ev: ProgressEvent) => cb(ev)

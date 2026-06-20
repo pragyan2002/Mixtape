@@ -3,42 +3,9 @@ import * as fs from 'fs'
 import { spawn } from 'child_process'
 import { ytDlpPath, ffmpegPath } from '../binaries'
 import { parseProgress } from './progress'
+import { buildFilename, assertInsideOutputDir } from './filename'
+import { recordDownload } from './manifest'
 import type { DownloadJob, ProgressEvent } from '../../../shared/types'
-
-function sanitizeFilename(name: string): string {
-  return name
-    .replace(/[/\\:*?"<>|]/g, '')
-    .replace(/\.{2,}/g, '.')
-    // eslint-disable-next-line no-control-regex
-    .replace(/[\x00-\x1f\x7f]/g, '')
-    .trim()
-    .slice(0, 200)
-}
-
-function assertInsideOutputDir(outputDir: string, filename: string): string {
-  const base = path.resolve(outputDir)
-  const resolved = path.resolve(base, filename)
-  // Path traversal guard
-  if (!resolved.startsWith(base + path.sep) && resolved !== base) {
-    throw new Error(`Path traversal detected: ${resolved}`)
-  }
-  return resolved
-}
-
-function buildFilename(job: DownloadJob, template: string): string {
-  const { title, artist } = job.track
-  const safeTitle = sanitizeFilename(title)
-  const safeArtist = sanitizeFilename(artist)
-  switch (template) {
-    case 'title-artist':
-      return `${safeTitle} - ${safeArtist}.mp3`
-    case 'title':
-      return `${safeTitle}.mp3`
-    case 'artist-title':
-    default:
-      return `${safeArtist} - ${safeTitle}.mp3`
-  }
-}
 
 export interface DownloadOptions {
   outputDir: string
@@ -46,9 +13,38 @@ export interface DownloadOptions {
   filenameTemplate: string
 }
 
+/**
+ * Resolve a unique, traversal-safe output path for a job. If the desired path is
+ * already taken in this session (`taken`) or exists on disk, append ` (2)`, ` (3)`…
+ * before the extension until free, so distinct songs never overwrite each other.
+ * The chosen path is added to `taken`.
+ */
+export function resolveOutputPath(
+  job: DownloadJob,
+  opts: DownloadOptions,
+  taken: Set<string>,
+): string {
+  const filename = buildFilename(job.track, opts.filenameTemplate)
+  const base = assertInsideOutputDir(opts.outputDir, filename)
+
+  const ext = path.extname(base)
+  const stem = base.slice(0, base.length - ext.length)
+
+  let candidate = base
+  let n = 2
+  while (taken.has(candidate) || fs.existsSync(candidate)) {
+    candidate = `${stem} (${n})${ext}`
+    n++
+  }
+
+  taken.add(candidate)
+  return candidate
+}
+
 export async function runDownload(
   job: DownloadJob,
   opts: DownloadOptions,
+  outputPath: string,
   onProgress: (event: ProgressEvent) => void,
 ): Promise<string> {
   const { videoId } = job.track
@@ -58,9 +54,6 @@ export async function runDownload(
   }
 
   fs.mkdirSync(opts.outputDir, { recursive: true })
-
-  const filename = buildFilename(job, opts.filenameTemplate)
-  const outputPath = assertInsideOutputDir(opts.outputDir, filename)
 
   const args = [
     `https://www.youtube.com/watch?v=${videoId}`,
@@ -107,6 +100,7 @@ export async function runDownload(
     child.on('close', (code) => {
       clearTimeout(timer)
       if (code === 0) {
+        recordDownload(opts.outputDir, videoId, outputPath, job.track)
         resolve(outputPath)
       } else {
         reject(new Error(`yt-dlp exited ${code}: ${stderr.slice(-500)}`))

@@ -38,11 +38,15 @@ export default function App() {
 
   async function handleStartDownload(newJobs: DownloadJob[], outputDir: string) {
     if (!settings) return
+    // Jobs pre-marked 'skipped' (already present in the folder) are shown but not queued.
+    const toQueue = newJobs.filter((j) => j.status !== 'skipped')
     setJobs((prev) => [...prev, ...newJobs])
     setPage('downloads')
 
+    if (toQueue.length === 0) return
+
     await ipc.download.start({
-      jobs: newJobs,
+      jobs: toQueue,
       outputDir,
       bitrate: settings.bitrate,
       filenameTemplate: settings.filenameTemplate,
@@ -72,14 +76,20 @@ export default function App() {
             onChange={setPage}
             trackCount={tracks.length}
             downloadCount={
-              jobs.filter((j) => j.status !== 'done' && j.status !== 'cancelled').length
+              jobs.filter(
+                (j) => j.status !== 'done' && j.status !== 'cancelled' && j.status !== 'skipped',
+              ).length
             }
           />
 
           <main className="relative z-10 flex-1 overflow-hidden">
             {page === 'import' && <ImportPage onImported={handleImported} />}
             {page === 'library' && (
-              <LibraryPage tracks={tracks} onStartDownload={handleStartDownload} />
+              <LibraryPage
+                tracks={tracks}
+                filenameTemplate={settings.filenameTemplate}
+                onStartDownload={handleStartDownload}
+              />
             )}
             {page === 'downloads' && (
               <DownloadsPage jobs={jobs} onJobsUpdate={handleJobsUpdate} />

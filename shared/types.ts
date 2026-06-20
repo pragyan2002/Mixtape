@@ -22,6 +22,7 @@ export const DownloadStatusSchema = z.enum([
   'failed',
   'retrying',
   'cancelled',
+  'skipped',
 ])
 export type DownloadStatus = z.infer<typeof DownloadStatusSchema>
 
