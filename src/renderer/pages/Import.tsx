@@ -1,12 +1,14 @@
 import React from 'react'
-import { UploadCloud, Chrome, Globe } from 'lucide-react'
+import { UploadCloud, Chrome, Globe, Disc3 } from 'lucide-react'
 import { Button } from '../components/Button'
 import { ipc } from '../lib/ipc'
-import type { Track, Browser } from '../../../shared/types'
+import type { Track, Browser, ImportResult, ImportProgressEvent } from '../../../shared/types'
 
 interface Props {
   onImported: (tracks: Track[]) => void
 }
+
+type Source = 'csv' | 'cookies' | 'spotify'
 
 const BROWSERS: { value: Browser; label: string }[] = [
   { value: 'chrome', label: 'Chrome' },
@@ -17,65 +19,55 @@ const BROWSERS: { value: Browser; label: string }[] = [
 ]
 
 export function ImportPage({ onImported }: Props) {
-  const [dragging, setDragging] = React.useState(false)
-  const [loading, setLoading] = React.useState<'csv' | 'cookies' | null>(null)
+  const [dragging, setDragging] = React.useState<'csv' | 'spotify' | null>(null)
+  const [loading, setLoading] = React.useState<Source | null>(null)
   const [browser, setBrowser] = React.useState<Browser>('chrome')
   const [errors, setErrors] = React.useState<string[]>([])
+  const [progress, setProgress] = React.useState<ImportProgressEvent | null>(null)
 
-  async function handleFiles(filePaths: string[]) {
-    if (!filePaths.length) return
-    setLoading('csv')
+  React.useEffect(() => ipc.import.onProgress(setProgress), [])
+
+  async function ingest(source: Source, importer: () => Promise<ImportResult>) {
+    setLoading(source)
     setErrors([])
+    setProgress(null)
     try {
-      const result = await ipc.import.takeout(filePaths)
+      const result = await importer()
       if (result.errors.length) setErrors(result.errors)
       if (result.tracks.length) onImported(result.tracks)
     } catch (err) {
       setErrors([String(err)])
     } finally {
       setLoading(null)
+      setProgress(null)
     }
   }
 
-  async function handlePickFiles() {
-    const files = await ipc.dialog.openFiles()
-    handleFiles(files)
+  function handleTakeoutFiles(filePaths: string[]) {
+    if (filePaths.length) ingest('csv', () => ipc.import.takeout(filePaths))
   }
 
-  function handleDrop(e: React.DragEvent) {
-    e.preventDefault()
-    setDragging(false)
-    const files = Array.from(e.dataTransfer.files)
+  function handleSpotifyFiles(filePaths: string[]) {
+    if (filePaths.length) ingest('spotify', () => ipc.import.spotify(filePaths))
+  }
+
+  function csvPathsFromDrop(e: React.DragEvent): string[] {
+    return Array.from(e.dataTransfer.files)
       .filter((f) => f.name.endsWith('.csv'))
       .map((f) => ipc.dialog.getPathForFile(f))
-    handleFiles(files)
-  }
-
-  async function handleCookies() {
-    setLoading('cookies')
-    setErrors([])
-    try {
-      const result = await ipc.import.cookies(browser)
-      if (result.errors.length) setErrors(result.errors)
-      if (result.tracks.length) onImported(result.tracks)
-    } catch (err) {
-      setErrors([String(err)])
-    } finally {
-      setLoading(null)
-    }
   }
 
   return (
-    <div className="flex flex-col items-center justify-center h-full gap-8 px-8 py-12">
+    <div className="flex flex-col items-center justify-center h-full gap-8 px-8 py-12 overflow-y-auto">
       <div className="glass rounded-xl px-8 py-6 text-center">
         <h1 className="text-2xl font-bold text-text mb-2">Import Your Music Library</h1>
         <p className="text-text-muted max-w-md">
-          Choose how to load your YouTube Music library. Takeout CSV is recommended, no login
+          Bring in your library from YouTube Music or Spotify. CSV import is recommended, no login
           needed.
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-2xl">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-5xl">
         {/* Takeout CSV */}
         <div className="space-y-3">
           <h2 className="text-sm font-semibold text-text-muted uppercase tracking-wider">
@@ -84,15 +76,21 @@ export function ImportPage({ onImported }: Props) {
           <div
             className={[
               'glass relative border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-colors',
-              dragging ? 'border-primary bg-primary/10' : 'border-text/20 hover:border-text/30',
+              dragging === 'csv'
+                ? 'border-primary bg-primary/10'
+                : 'border-text/20 hover:border-text/30',
             ].join(' ')}
             onDragOver={(e) => {
               e.preventDefault()
-              setDragging(true)
+              setDragging('csv')
             }}
-            onDragLeave={() => setDragging(false)}
-            onDrop={handleDrop}
-            onClick={loading ? undefined : handlePickFiles}
+            onDragLeave={() => setDragging(null)}
+            onDrop={(e) => {
+              e.preventDefault()
+              setDragging(null)
+              handleTakeoutFiles(csvPathsFromDrop(e))
+            }}
+            onClick={loading ? undefined : async () => handleTakeoutFiles(await ipc.dialog.openFiles())}
           >
             <UploadCloud className="mx-auto mb-3 text-text-muted" size={36} />
             <p className="text-text font-medium mb-1">Drop CSV files here</p>
@@ -104,16 +102,56 @@ export function ImportPage({ onImported }: Props) {
             )}
           </div>
           <p className="glass rounded-lg px-3 py-2 text-text-muted text-xs">
-            Go to{' '}
-            <span className="text-primary">takeout.google.com</span> → YouTube and YouTube Music
-            → Export playlists CSVs.
+            Go to <span className="text-primary">takeout.google.com</span> → YouTube and YouTube
+            Music → Export playlists CSVs.
+          </p>
+        </div>
+
+        {/* Spotify CSV (Exportify) */}
+        <div className="space-y-3">
+          <h2 className="text-sm font-semibold text-text-muted uppercase tracking-wider">
+            Option 2: Spotify (Exportify CSV)
+          </h2>
+          <div
+            className={[
+              'glass relative border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-colors',
+              dragging === 'spotify'
+                ? 'border-emerald-500 bg-emerald-500/10'
+                : 'border-text/20 hover:border-text/30',
+            ].join(' ')}
+            onDragOver={(e) => {
+              e.preventDefault()
+              setDragging('spotify')
+            }}
+            onDragLeave={() => setDragging(null)}
+            onDrop={(e) => {
+              e.preventDefault()
+              setDragging(null)
+              handleSpotifyFiles(csvPathsFromDrop(e))
+            }}
+            onClick={loading ? undefined : async () => handleSpotifyFiles(await ipc.dialog.openFiles())}
+          >
+            <Disc3 className="mx-auto mb-3 text-emerald-400" size={36} />
+            <p className="text-text font-medium mb-1">Drop Spotify CSV here</p>
+            <p className="text-text-muted text-sm">or click to browse</p>
+            {loading === 'spotify' && (
+              <div className="absolute inset-0 flex flex-col items-center justify-center rounded-xl bg-surface/80">
+                <span className="text-primary font-medium animate-pulse">
+                  {progress ? `Matching ${progress.done}/${progress.total} on YouTube…` : 'Reading…'}
+                </span>
+              </div>
+            )}
+          </div>
+          <p className="glass rounded-lg px-3 py-2 text-text-muted text-xs">
+            Go to <span className="text-emerald-400">exportify.net</span> → export your playlists or
+            Liked Songs to CSV. Tracks are matched on YouTube to download.
           </p>
         </div>
 
         {/* Browser cookies */}
         <div className="space-y-3">
           <h2 className="text-sm font-semibold text-text-muted uppercase tracking-wider">
-            Option 2: Connect via Browser
+            Option 3: Connect via Browser
           </h2>
           <div className="glass border border-text/10 rounded-xl p-6 space-y-4">
             <div className="flex items-center gap-2 text-text-muted">
@@ -138,7 +176,7 @@ export function ImportPage({ onImported }: Props) {
               variant="secondary"
               className="w-full"
               loading={loading === 'cookies'}
-              onClick={handleCookies}
+              onClick={() => ingest('cookies', () => ipc.import.cookies(browser))}
             >
               <Chrome size={16} />
               Connect YouTube Music
@@ -152,7 +190,7 @@ export function ImportPage({ onImported }: Props) {
       </div>
 
       {errors.length > 0 && (
-        <div className="w-full max-w-2xl bg-rose-100 border border-rose-300 rounded-xl p-4">
+        <div className="w-full max-w-5xl bg-rose-100 border border-rose-300 rounded-xl p-4">
           <p className="text-rose-700 text-sm font-semibold mb-2">Import issues:</p>
           <ul className="text-rose-600 text-sm space-y-1 max-h-32 overflow-y-auto">
             {errors.map((e, i) => (

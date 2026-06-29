@@ -1,5 +1,12 @@
 import { contextBridge, ipcRenderer, webUtils } from 'electron'
-import type { Settings, ImportResult, DownloadJob, ProgressEvent, Browser } from '../../shared/types'
+import type {
+  Settings,
+  ImportResult,
+  ImportProgressEvent,
+  DownloadJob,
+  ProgressEvent,
+  Browser,
+} from '../../shared/types'
 
 export type MixtapeAPI = typeof api
 
@@ -26,6 +33,13 @@ const api = {
       ipcRenderer.invoke('import:takeout', filePaths),
     cookies: (browser: Browser): Promise<ImportResult> =>
       ipcRenderer.invoke('import:cookies', browser),
+    spotify: (filePaths: string[]): Promise<ImportResult> =>
+      ipcRenderer.invoke('import:spotify', filePaths),
+    onProgress: (cb: (event: ImportProgressEvent) => void): (() => void) => {
+      const handler = (_e: Electron.IpcRendererEvent, ev: ImportProgressEvent) => cb(ev)
+      ipcRenderer.on('import:progress', handler)
+      return () => ipcRenderer.off('import:progress', handler)
+    },
   },
 
   download: {
