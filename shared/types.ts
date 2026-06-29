@@ -67,6 +67,12 @@ export const ImportResultSchema = z.object({
 })
 export type ImportResult = z.infer<typeof ImportResultSchema>
 
+export const ImportProgressEventSchema = z.object({
+  done: z.number().int().min(0),
+  total: z.number().int().min(0),
+})
+export type ImportProgressEvent = z.infer<typeof ImportProgressEventSchema>
+
 export const BrowserSchema = z.enum(['chrome', 'firefox', 'safari', 'edge', 'brave', 'opera'])
 export type Browser = z.infer<typeof BrowserSchema>
 

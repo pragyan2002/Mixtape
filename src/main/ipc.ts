@@ -3,6 +3,7 @@ import { z } from 'zod'
 import Store from 'electron-store'
 import { parseTakeoutCsv } from './import/takeout-csv'
 import { fetchLibraryFromCookies } from './import/youtube-cookies'
+import { importSpotifyCsv } from './import/spotify-csv'
 import { createQueue } from './download/queue'
 import type { QueueController } from './download/queue'
 import { findExisting } from './download/manifest'
@@ -13,6 +14,7 @@ import {
   DISCLAIMER_VERSION,
   type Settings,
   type ProgressEvent,
+  type ImportProgressEvent,
 } from '../../shared/types'
 
 const store = new Store<Settings>({
@@ -29,6 +31,12 @@ function getSettings(): Settings {
 function broadcastProgress(win: BrowserWindow, event: ProgressEvent) {
   if (!win.isDestroyed()) {
     win.webContents.send('download:progress', event)
+  }
+}
+
+function broadcastImportProgress(win: BrowserWindow, event: ImportProgressEvent) {
+  if (!win.isDestroyed()) {
+    win.webContents.send('import:progress', event)
   }
 }
 
@@ -90,6 +98,14 @@ export function registerIpcHandlers(win: BrowserWindow): void {
   ipcMain.handle('import:cookies', async (_e, browser: unknown) => {
     const b = BrowserSchema.parse(browser)
     return fetchLibraryFromCookies(b)
+  })
+
+  ipcMain.handle('import:spotify', async (_e, filePaths: unknown) => {
+    const paths = z.array(z.string()).parse(filePaths)
+    const { concurrency } = getSettings()
+    return importSpotifyCsv(paths, concurrency, (done, total) =>
+      broadcastImportProgress(win, { done, total }),
+    )
   })
 
   // Downloads
